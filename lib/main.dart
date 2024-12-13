@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Workout Routine',
+      title: '운동 루틴',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -24,57 +24,82 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class WorkoutRoutinePage extends StatelessWidget {
-  final List<Workout> workouts = [
-    mondayWorkout,
-    tuesdayWorkout,
-    wednesdayWorkout,
-    thursdayWorkout,
-    fridayWorkout,
-    saturdayWorkout,
-  ];
+class WorkoutRoutinePage extends StatefulWidget {
+  @override
+  _WorkoutRoutinePageState createState() => _WorkoutRoutinePageState();
+}
+
+class _WorkoutRoutinePageState extends State<WorkoutRoutinePage> {
+  final Map<int, Workout> workouts = {
+    DateTime.monday: mondayWorkout,
+    DateTime.tuesday: tuesdayWorkout,
+    DateTime.wednesday: wednesdayWorkout,
+    DateTime.thursday: thursdayWorkout,
+    DateTime.friday: fridayWorkout,
+    DateTime.saturday: saturdayWorkout,
+  };
+
+  Workout getTodayWorkout() {
+    int today = DateTime.now().weekday;
+    return workouts[today] ?? Workout(day: '오늘은 운동이 없습니다', exercises: []);
+  }
 
   @override
   Widget build(BuildContext context) {
+    Workout todayWorkout = getTodayWorkout();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Workout Routine'),
       ),
-      body: ListView.builder(
-        itemCount: workouts.length,
-        itemBuilder: (context, index) {
-          return WorkoutCard(workout: workouts[index]);
-        },
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              '오늘의 운동 (${todayWorkout.day})',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: todayWorkout.exercises.length,
+              itemBuilder: (context, index) {
+                return ExerciseTile(exercise: todayWorkout.exercises[index]);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class WorkoutCard extends StatelessWidget {
-  final Workout workout;
+class ExerciseTile extends StatefulWidget {
+  final Exercise exercise;
 
-  WorkoutCard({required this.workout});
+  ExerciseTile({required this.exercise});
+
+  @override
+  _ExerciseTileState createState() => _ExerciseTileState();
+}
+
+class _ExerciseTileState extends State<ExerciseTile> {
+  bool isChecked = false;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.all(10),
-      child: Padding(
-        padding: EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              workout.day,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            ...workout.exercises.map((exercise) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Text(
-                      '${exercise.name}: ${exercise.sets}세트, ${exercise.reps}'),
-                )),
-          ],
-        ),
+    return ListTile(
+      title: Text(
+          '${widget.exercise.name}: ${widget.exercise.sets}세트, ${widget.exercise.reps}'),
+      trailing: Checkbox(
+        value: isChecked,
+        onChanged: (bool? value) {
+          setState(() {
+            isChecked = value ?? false;
+          });
+        },
       ),
     );
   }
