@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // 추가된 부분
 import 'models/workout.dart';
 import 'days/monday.dart';
 import 'days/tuesday.dart';
@@ -39,27 +40,66 @@ class _WorkoutRoutinePageState extends State<WorkoutRoutinePage> {
     DateTime.saturday: saturdayWorkout,
   };
 
-  Workout getTodayWorkout() {
-    int today = DateTime.now().weekday;
-    return workouts[today] ?? Workout(day: '오늘은 운동이 없습니다', exercises: []);
+  DateTime selectedDate = DateTime.now();
+
+  Workout getWorkoutForDate(DateTime date) {
+    int weekday = date.weekday;
+    return workouts[weekday] ?? Workout(day: '오늘은 운동이 없습니다', exercises: []);
   }
 
   @override
   Widget build(BuildContext context) {
-    Workout todayWorkout = getTodayWorkout();
+    Workout todayWorkout = getWorkoutForDate(selectedDate);
+    String today = DateFormat('yyyy-MM-dd').format(selectedDate);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Workout Routine'),
+        // title: Text('Workout Routine'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.today),
+            onPressed: () {
+              setState(() {
+                selectedDate = DateTime.now();
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.calendar_today),
+            onPressed: () async {
+              DateTime? pickedDate = await showDatePicker(
+                context: context,
+                initialDate: selectedDate,
+                firstDate: DateTime(2024),
+                lastDate: DateTime(2050),
+              );
+              if (pickedDate != null && pickedDate != selectedDate) {
+                setState(() {
+                  selectedDate = pickedDate;
+                });
+              }
+            },
+          ),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text(
-              '오늘의 운동 (${todayWorkout.day})',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '오늘의 날짜: $today',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  '오늘의 운동 (${todayWorkout.day})',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
           Expanded(
