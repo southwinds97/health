@@ -91,7 +91,7 @@ class _WorkoutRoutinePageState extends State<WorkoutRoutinePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '오늘의 날짜: $today',
+                  '오늘의 날짜: $today' ?? '',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 8),
